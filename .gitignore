@@ -29,7 +29,8 @@ meson-logs/
 !.gitignore
 
 
-
+debug.log
+.vscode/
 
 key.txt
 

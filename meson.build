@@ -6,5 +6,17 @@ boost_dep = dependency('boost', modules : ['program_options'])
 curl_dep = cpp.find_library('curl')
 jsoncpp_dep = cpp.find_library('jsoncpp')
 
-executable('relax', 'init.cpp', dependencies : [boost_dep, curl_dep, jsoncpp_dep])
+# Incluir ambas posibles rutas de jsoncpp
+jsoncpp_inc1 = include_directories('/usr/include/jsoncpp')
+jsoncpp_inc2 = include_directories('/usr/include/jsoncpp/json')
+
+executable('relax', 
+    'init.cpp', 
+    include_directories: [jsoncpp_inc1, jsoncpp_inc2],
+    dependencies : [boost_dep, curl_dep, jsoncpp_dep]
+)
+
+
+
+
 

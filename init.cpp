@@ -167,5 +167,6 @@ std::string ask_chatgpt(const std::string &chatgpt_key, const std::string &quest
     Json::Value response_json;
     std::istringstream response_stream(response_string);
     response_stream >> response_json;
+    
     return response_json["choices"][0]["message"]["content"].asString();
 }

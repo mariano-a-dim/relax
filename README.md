@@ -35,9 +35,12 @@ The program checks for an internet connection before making a request to the Ope
 
 The program uses libcurl to make a POST request to the OpenAI API. It sends a question to the chatgpt model and receives a response, which it logs to the `debug.log` file.
 
-## Boost Library
+## Dependencies
 
-The Boost library is used in this program to handle command-line options. It provides a powerful options description mechanism that allows the program to accept command-line options in a flexible way.
+Boost Library
+jsoncpp Library
+Curl Libreary
+
 
 ## Logging
 

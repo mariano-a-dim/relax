@@ -1,0 +1,29 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build python3-pip libboost-program-options-dev libcurl4-openssl-dev libjsoncpp-dev
+        pip3 install meson
+
+    - name: Build
+      run: |
+        meson setup builddir
+        meson compile -C builddir
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: compiled-binaries
+        path: builddir/*
+        
+      

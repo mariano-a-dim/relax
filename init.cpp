@@ -84,9 +84,11 @@ int main(int argc, char *argv[])
             return 1;
         }
         question = vm["ask"].as<std::string>(); // Set question with the ask value
-        std::cout << "User: " << question << "\n";
+        std::cout << "\033[32mUser: \033[0m" << question << "\033[32m\n";
+
         std::string response = ask_chatgpt(chatgpt_key, question, conversation_history);
-        std::cout << "IA: " << response << "\n";
+
+        std::cout << "\033[34mIA: " << response << "\033[0m\n";  // Blue color
     }
     else
     {
@@ -98,7 +100,7 @@ int main(int argc, char *argv[])
     while (true)
     {
         // Ask the user for another question
-        std::cout << "User: ";
+        std::cout << "\033[32mUser: \033[0m";
         std::getline(std::cin, question);
 
         // Check if the user wants to exit
@@ -109,7 +111,7 @@ int main(int argc, char *argv[])
 
         // Call the function to ask the question to chatgpt
         std::string response = ask_chatgpt(chatgpt_key, question, conversation_history);
-        std::cout << "IA: " << response << "\n";
+        std::cout << "\033[34mIA: " << response << "\033[0m\n";  // Blue color
     }
 
     // Close the logfile

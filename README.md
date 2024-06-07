@@ -48,3 +48,14 @@ The program logs debug information to a file named `debug.log`. This includes th
 
 ## License
 
+## TODOs
+
+- Add support to set temperature and model
+- Save conversation to a file or SQL database table or not relational one
+- Parse and resume previous conversations so that i can follow a new conversation with a seed conversation
+- Generate package's to install on windows, linux and mac
+- Add a option to skip a response (user does not want to save or have a partucular question in the conversation)
+- Add support for test to speech ot the other way around
+
+
+

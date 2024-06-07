@@ -17,7 +17,7 @@ std::ofstream logfile;
 // Function declarations
 bool is_connected();
 size_t write_callback(void *contents, size_t size, size_t nmemb, std::string *s);
-std::string ask_chatgpt(const std::string &chatgpt_key, const std::string &question);
+std::string ask_chatgpt(const std::string &chatgpt_key, const std::string &question, Json::Value &conversation_history);
 
 int main(int argc, char *argv[])
 {
@@ -44,6 +44,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Initialize the conversation history with a system message
+    Json::Value conversation_history;
+    Json::Value system_message;
+    system_message["role"] = "system";
+    system_message["content"] = "Hello, I'm a chatbot that can answer your questions. You can ask me anything.";
+    conversation_history.append(system_message);
+
     // Load chatgpt key from file or command line argument
     std::ifstream file(key_file);
     if (file)
@@ -51,7 +58,8 @@ int main(int argc, char *argv[])
         std::getline(file, chatgpt_key);
         std::cout << "chatgpt key was loaded from file.\n";
     }
-    else if (vm.count("key"))
+
+    if (vm.count("key"))
     {
         std::regex key_format("^sk-.*$");
         if (std::regex_match(chatgpt_key, key_format))
@@ -67,6 +75,19 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
+    else if (vm.count("ask"))
+    {
+        // Check if api key is defined
+        if (chatgpt_key.empty())
+        {
+            std::cout << "chatgpt key is not defined.\n";
+            return 1;
+        }
+        question = vm["ask"].as<std::string>(); // Set question with the ask value
+        std::cout << "User: " << question << "\n";
+        std::string response = ask_chatgpt(chatgpt_key, question, conversation_history);
+        std::cout << "IA: " << response << "\n";
+    }
     else
     {
         std::cout << "chatgpt key was not set.\n";
@@ -74,15 +95,21 @@ int main(int argc, char *argv[])
     }
 
     // Ask a question to chatgpt
-    if (vm.count("ask"))
+    while (true)
     {
-        if (chatgpt_key.empty())
+        // Ask the user for another question
+        std::cout << "User: ";
+        std::getline(std::cin, question);
+
+        // Check if the user wants to exit
+        if (question == "stop")
         {
-            std::cout << "chatgpt key is not defined.\n";
-            return 1;
+            break;
         }
-        std::string response = ask_chatgpt(chatgpt_key, question);
-        std::cout << "Response from chatgpt: " << response << "\n";
+
+        // Call the function to ask the question to chatgpt
+        std::string response = ask_chatgpt(chatgpt_key, question, conversation_history);
+        std::cout << "IA: " << response << "\n";
     }
 
     // Close the logfile
@@ -127,30 +154,40 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, std::string *s)
         return 0;
     }
     std::copy((char *)contents, (char *)contents + new_length, s->begin() + old_length);
+    // Print the response to the logfile
+    // logfile << "Response from curl: " << *s << std::endl;
     return new_length;
 }
 
-
-
-
-std::string ask_chatgpt(const std::string &chatgpt_key, const std::string &question)
+// Ask a question to chatgpt
+std::string ask_chatgpt(const std::string &chatgpt_key, const std::string &question, Json::Value &conversation_history)
 {
     // Setup curl and API request
     CURL *curl = curl_easy_init();
     std::string response_string;
     std::string url = "https://api.openai.com/v1/chat/completions";
+    // https://platform.openai.com/docs/api-reference/chat
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, ("Authorization: Bearer " + chatgpt_key).c_str());
     headers = curl_slist_append(headers, "Content-Type: application/json");
 
     // Prepare JSON payload
     Json::Value json;
-    Json::Value message;
-    message["role"] = "user";
-    message["content"] = question;
     json["model"] = "gpt-4o";
-    json["messages"].append(message);
+    json["temperature"] = 0.5;
+
+    // Append the new user message to the conversation history
+    Json::Value user_message;
+    user_message["role"] = "user";
+    user_message["content"] = question;
+    conversation_history.append(user_message);
+
+    // Insert the conversation history into the JSON payload
+    json["messages"] = conversation_history;
+
     std::string json_string = json.toStyledString();
+
+    logfile << "Request to chatgpt: " << json_string << std::endl;
 
     // Set curl options and perform the request
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -159,6 +196,7 @@ std::string ask_chatgpt(const std::string &chatgpt_key, const std::string &quest
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_string.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
+    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);  // Enable verbose output
     curl_easy_perform(curl);
     curl_easy_cleanup(curl);
     curl_slist_free_all(headers);
@@ -167,6 +205,12 @@ std::string ask_chatgpt(const std::string &chatgpt_key, const std::string &quest
     Json::Value response_json;
     std::istringstream response_stream(response_string);
     response_stream >> response_json;
-    
-    return response_json["choices"][0]["message"]["content"].asString();
+
+    // Append the assistant's response to the conversation history
+    Json::Value assistant_message;
+    assistant_message["role"] = "assistant";
+    assistant_message["content"] = response_json["choices"][0]["message"]["content"].asString();
+    conversation_history.append(assistant_message);
+
+    return assistant_message["content"].asString();
 }

@@ -7,12 +7,12 @@ curl_dep = cpp.find_library('curl')
 jsoncpp_dep = cpp.find_library('jsoncpp')
 
 # Incluir ambas posibles rutas de jsoncpp
-jsoncpp_inc1 = include_directories('/usr/include/jsoncpp')
-jsoncpp_inc2 = include_directories('/usr/include/jsoncpp/json')
+jsoncpp_inc1 = include_directories('/usr/include/json')
+# jsoncpp_inc2 = include_directories('/usr/include/jsoncpp/json')
 
 executable('relax', 
-    'init.cpp', 
-    include_directories: [jsoncpp_inc1, jsoncpp_inc2],
+    ['init.cpp', 'chatgptclient.cpp'], 
+    include_directories: [jsoncpp_inc1],
     dependencies : [boost_dep, curl_dep, jsoncpp_dep]
 )
 

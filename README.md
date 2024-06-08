@@ -1,6 +1,8 @@
 # Relax Program
 
-Relax is a command-line program that manages and validates chatgpt keys. It uses the Boost library to handle command-line options and libcurl to interact with the OpenAI API. It also includes a simple logging feature for debugging.
+Relax is a command-line chatgpt terminal client. 
+It uses the Boost library to handle command-line options and libcurl to interact with the OpenAI API. 
+It uses gpt-4o model
 
 ## Installation
 
@@ -27,26 +29,33 @@ The program will validate the key and save it to a file. If the key file already
 
 The program validates the chatgpt key format using a regular expression. The key should start with sk-.
 
-## Internet Connection Check
-
-The program checks for an internet connection before making a request to the OpenAI API. If there's no internet connection, it will log an error message to a file named `debug.log`.
 
 ## OpenAI API Interaction
 
-The program uses libcurl to make a POST request to the OpenAI API. It sends a question to the chatgpt model and receives a response, which it logs to the `debug.log` file.
+The program uses libcurl to make POST request's to the OpenAI API. It sends question's to the chatgpt model and receives a response, which it logs to the `debug.log` file.
+
 
 ## Dependencies
 
-Boost Library
-jsoncpp Library
-Curl Libreary
+- Boost Library
+- jsoncpp Library
+- Curl Libreary
 
+### Instalation on Arch based linux
 
+```bash
+sudo pacman -Syu boost jsoncpp curl
+```
+
+### Instalation on Debian based linux
+
+```bash
+sudo apt-get update
+sudo apt-get install libboost-all-dev libjsoncpp-dev libcurl4-openssl-dev
+```
 ## Logging
 
-The program logs debug information to a file named `debug.log`. This includes the result of the internet connection check and the response from the OpenAI API.
-
-## License
+The program logs debug information to a file named `debug.log`. the response from the OpenAI API.
 
 ## TODOs
 
@@ -56,6 +65,4 @@ The program logs debug information to a file named `debug.log`. This includes th
 - Generate package's to install on windows, linux and mac
 - Add a option to skip a response (user does not want to save or have a partucular question in the conversation)
 - Add support for test to speech ot the other way around
-
-
 

@@ -30,7 +30,9 @@ meson-logs/
 
 
 debug.log
-.vscode/
+.vscode/   # Visual Studio Code
+
+
 
 key.txt
 
